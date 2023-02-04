@@ -11,7 +11,7 @@ import timber.log.Timber
 class App: Application() {
 
     private val applicationScope = CoroutineScope(Dispatchers.Default)
-    
+
     override fun onCreate() {
         super.onCreate()
         delayedInit()
