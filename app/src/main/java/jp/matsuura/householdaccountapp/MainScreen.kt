@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
@@ -17,9 +19,23 @@ import jp.matsuura.householdaccountapp.ui.theme.HouseHoldAccountAppTheme
 fun MainScreen() {
     HouseHoldAccountAppTheme {
         val navController = rememberNavController()
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentDestination = navBackStackEntry?.destination
+
+        // State of bottomBar, set state to false, if current page route is "car_details"
+        val bottomBarState = rememberSaveable { (mutableStateOf(true)) }
+        when (navBackStackEntry?.destination?.route) {
+            NavScreen.InputMoneyScreen.route -> {
+                bottomBarState.value = false
+            }
+            else -> {
+                bottomBarState.value = true
+            }
+        }
+
         // A surface container using the 'background' color from the theme
         Scaffold(
-            bottomBar = { BottomBar(navController = navController) }
+            bottomBar = { if (bottomBarState.value) BottomBar(navController = navController, currentDestination = currentDestination) },
         ) {
             BottomBarGraph(navController = navController)
         }
@@ -27,14 +43,15 @@ fun MainScreen() {
 }
 
 @Composable
-fun BottomBar(navController: NavHostController) {
+fun BottomBar(
+    navController: NavHostController,
+    currentDestination: NavDestination?,
+) {
     val screens = listOf(
         BottomBarNavScreen.Home,
         BottomBarNavScreen.History,
         BottomBarNavScreen.Analyze,
     )
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination
     BottomNavigation {
         screens.forEach { screen ->
             AddItem(
