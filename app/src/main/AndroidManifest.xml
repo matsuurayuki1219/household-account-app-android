@@ -11,6 +11,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.HouseHoldAccountApp"
+        android:name=".App"
         tools:targetApi="33">
         <activity
             android:name=".MainActivity"
