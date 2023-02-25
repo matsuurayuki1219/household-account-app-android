@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jp.matsuura.householdaccountapp.domain.GetCategoryUseCase
 import jp.matsuura.householdaccountapp.domain.SaveTransactionUseCase
+import jp.matsuura.householdaccountapp.model.CalculatorType
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -36,6 +37,40 @@ class InputMoneyViewModel @Inject constructor(
             }.onFailure {
                 Timber.d(it)
                 _uiState.value = _uiState.value.copy(isProgressVisible = false)
+            }
+        }
+    }
+
+    fun onCalculatorClicked(value: CalculatorType) {
+        val currentMoney = _uiState.value.totalMoneyAmount
+        when (value) {
+            is CalculatorType.Number -> {
+                try {
+                    if (value.number == "00") {
+                        val total = if (currentMoney == 0) {
+                            "0"
+                        } else {
+                            currentMoney.toString() + value.number
+                        }
+                        _uiState.value = _uiState.value.copy(totalMoneyAmount = total.toInt())
+                    } else {
+                        val total = if (currentMoney == 0) {
+                            value.number
+                        } else {
+                            currentMoney.toString() + value.number
+                        }
+                        _uiState.value = _uiState.value.copy(totalMoneyAmount = total.toInt())
+                    }
+                } catch (e: NumberFormatException) {
+                    Timber.d(e)
+                    viewModelScope.launch {
+                        _uiEvent.emit(InputMoneyScreenEvent.Error(e))
+                    }
+                }
+            }
+            is CalculatorType.Del -> {
+                val text = currentMoney / 10
+                _uiState.value = _uiState.value.copy(totalMoneyAmount = text)
             }
         }
     }

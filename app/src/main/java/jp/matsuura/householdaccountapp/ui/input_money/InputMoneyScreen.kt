@@ -1,6 +1,5 @@
 package jp.matsuura.householdaccountapp.ui.input_money
 
-import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,13 +23,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import jp.matsuura.householdaccountapp.R
 import jp.matsuura.householdaccountapp.model.CalculatorType
 import jp.matsuura.householdaccountapp.model.CategoryModel
-import jp.matsuura.householdaccountapp.ui.home.CategoryItem
-import jp.matsuura.householdaccountapp.ui.home.HomeScreenEvent
 
 @Composable
 fun InputMoneyScreen(
@@ -56,6 +52,9 @@ fun InputMoneyScreen(
         state = state,
         onConfirmButtonClicked = {
             viewModel.onConfirmButtonClicked()
+        },
+        onCalculatorClicked = { type ->
+            viewModel.onCalculatorClicked(value = type)
         }
     )
 }
@@ -64,6 +63,7 @@ fun InputMoneyScreen(
 fun InputMoneyScreen(
     state: InputMoneyScreenState,
     onConfirmButtonClicked: (Unit) -> Unit,
+    onCalculatorClicked: (CalculatorType) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -73,7 +73,9 @@ fun InputMoneyScreen(
         Text(modifier = Modifier.padding(bottom = 16.dp), text = "2023年2月15日(土)", fontSize = 16.sp)
         SelectedCategoryItem(category = state.selectedCategory)
         TotalMoneyItem(totalMoney = state.totalMoneyAmount)
-        CalculatorItem()
+        CalculatorItem(
+            onCalculatorClicked = onCalculatorClicked,
+        )
         Button(
             modifier = Modifier
                 .fillMaxWidth()
@@ -117,32 +119,35 @@ fun TotalMoneyItem(totalMoney: Int) {
 }
 
 @Composable
-fun CalculatorItem() {
+fun CalculatorItem(
+    onCalculatorClicked: (CalculatorType) -> Unit,
+) {
     val items = listOf(
         CalculatorType.Number(number = "7"),
         CalculatorType.Number(number = "8"),
         CalculatorType.Number(number = "9"),
-        CalculatorType.Division,
+        // CalculatorType.Division,
         CalculatorType.Number(number = "4"),
         CalculatorType.Number(number = "5"),
         CalculatorType.Number(number = "6"),
-        CalculatorType.Multiplication,
+        // CalculatorType.Multiplication,
         CalculatorType.Number(number = "1"),
         CalculatorType.Number(number = "2"),
         CalculatorType.Number(number = "3"),
-        CalculatorType.Minus,
+        // CalculatorType.Minus,
         CalculatorType.Number(number = "00"),
         CalculatorType.Number(number = "0"),
-        CalculatorType.DecimalPoint,
-        CalculatorType.Plus,
+        CalculatorType.Del,
+        // CalculatorType.Plus,
     )
 
     LazyVerticalGrid(
-        columns = GridCells.Fixed(4),
+        columns = GridCells.Fixed(3),
         content = {
             items(count = items.size) { index ->
                 CellItem(
                     item = items[index],
+                    onCalculatorClicked = onCalculatorClicked,
                 )
             }
         }
@@ -150,25 +155,16 @@ fun CalculatorItem() {
 }
 
 @Composable
-fun CellItem(item: CalculatorType) {
+fun CellItem(
+    item: CalculatorType,
+    onCalculatorClicked: (CalculatorType) -> Unit,
+) {
     val text = when (item) {
         is CalculatorType.Number -> {
             item.number
         }
-        is CalculatorType.Plus -> {
-            "+"
-        }
-        is CalculatorType.Minus -> {
-            "-"
-        }
-        is CalculatorType.Multiplication -> {
-            "×"
-        }
-        is CalculatorType.Division -> {
-            "÷"
-        }
-        is CalculatorType.DecimalPoint -> {
-            "."
+        is CalculatorType.Del -> {
+            "DEL"
         }
     }
 
@@ -184,7 +180,9 @@ fun CellItem(item: CalculatorType) {
                 color = Color.Gray,
                 shape = RoundedCornerShape(0.dp)
             ),
-        onClick = {}
+        onClick = {
+            onCalculatorClicked(item)
+        }
     ) {
         Text(
             text = text,
