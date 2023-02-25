@@ -20,6 +20,18 @@ class CategoryRepository @Inject constructor(
         }
     }
 
+    suspend fun getById(categoryId: Int): CategoryModel {
+        return withContext(Dispatchers.IO) {
+            db.categoryDao().getById(categoryId = categoryId).toModel()
+        }
+    }
+
+    suspend fun getFirstOfAll(): CategoryModel {
+        return withContext(Dispatchers.IO) {
+            db.categoryDao().getAll().first().toModel()
+        }
+    }
+
     suspend fun insert(category: CategoryModel) {
         return withContext(Dispatchers.IO) {
             val entity = category.toEntity()

@@ -47,12 +47,11 @@ class HomeViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(category = categoryList.filter { it.categoryType == type })
     }
 
-    fun onItemClicked(categoryId: Int, categoryName: String) {
+    fun onItemClicked(categoryId: Int) {
         viewModelScope.launch {
             _uiEvent.emit(
                 HomeScreenEvent.NavigateToInputScreen(
                     categoryId = categoryId,
-                    categoryName = categoryName,
                 )
             )
         }

@@ -18,21 +18,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import jp.matsuura.householdaccountapp.model.CategoryModel
 import jp.matsuura.householdaccountapp.model.CategoryType
+import jp.matsuura.householdaccountapp.ui.NavItem
 import jp.matsuura.householdaccountapp.ui.theme.Purple40
 
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    navigateToInputScreen: (Int, String) -> Unit,
+    navController: NavController,
 ) {
     val state by viewModel.uiState.collectAsState()
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
         viewModel.uiEvent.collect {
             when (it) {
                 is HomeScreenEvent.NavigateToInputScreen -> {
-                    navigateToInputScreen(it.categoryId, it.categoryName)
+                    navController.navigate(NavItem.InputMoneyScreen.route + "/${it.categoryId}")
                 }
             }
         }
@@ -42,8 +44,8 @@ fun HomeScreen(
         onTypeChanged = { type ->
             viewModel.onTypeChanged(type = type)
         },
-        onItemClicked = { categoryId, categoryName ->
-            viewModel.onItemClicked(categoryId = categoryId, categoryName = categoryName)
+        onItemClicked = { categoryId ->
+            viewModel.onItemClicked(categoryId = categoryId)
         }
     )
 }
@@ -52,7 +54,7 @@ fun HomeScreen(
 fun HomeScreen(
     state: HomeScreenState,
     onTypeChanged: (CategoryType) -> Unit,
-    onItemClicked: (Int, String) -> Unit,
+    onItemClicked: (Int) -> Unit,
 ) {
     Box(
         modifier = Modifier.fillMaxWidth().fillMaxWidth().padding(24.dp),
@@ -92,7 +94,7 @@ fun HomeScreen(
 @Composable
 fun CategoryScreen(
     items: List<CategoryModel>,
-    onItemClicked: (Int, String) -> Unit,
+    onItemClicked: (Int) -> Unit,
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(4),
@@ -112,12 +114,12 @@ fun CategoryScreen(
 fun CategoryItem(
     categoryId: Int,
     categoryName: String,
-    onItemClicked: (Int, String) -> Unit,
+    onItemClicked: (Int) -> Unit,
 ) {
     Column (
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onItemClicked(categoryId, categoryName) },
+            .clickable { onItemClicked(categoryId) },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Canvas(
